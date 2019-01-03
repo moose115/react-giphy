@@ -30,3 +30,12 @@
     transform: rotate(360deg);
   }
 }
+
+.search-input {
+  color: white;
+  font-size: 2em;
+  padding: 15px 25px;
+  border: 1px solid #4a5261;
+  background: #3b414d;
+  border-radius: 25px;
+}

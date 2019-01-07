@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import './App.css';
 
-import Gif from './Gif';
+import Gifs from './Gifs';
 
 class App extends Component {
 
@@ -12,10 +12,9 @@ class App extends Component {
       gifs : [],
       timerID : null,
       query : '',
-      offset : 0,
-      gif : null
+      offset : 0
     }
-    
+
     this.search = this.search.bind(this);
     this.findGifs = this.findGifs.bind(this);
     this.handleChange = this.handleChange.bind(this);
@@ -25,14 +24,16 @@ class App extends Component {
     console.log('I am about to search!');
     client.search('gifs', {"q": this.state.query, offset: this.state.offset})
     .then((response) => {
-      console.log(response);
-
-      var tempGifs = this.state.gifs;
-      tempGifs.push(response.data);
-      console.log(tempGifs);
-      this.setState({gifs : tempGifs});
-      debugger;
-      console.log('found: ' + this.state.gifs);
+      let tempGifs = this.state.gifs;
+      response.data.forEach((el) => {
+        tempGifs.push(el);
+      });
+      this.setState({gifs : tempGifs.map((el) => {
+        console.log(el);
+        return el;
+      })});
+      this.setState({offset: this.state.gifs.length});
+      console.log(this.state.offset);
     })
     .catch((err) => {
       console.log('an error occured, dang it \n' + err);
@@ -40,7 +41,10 @@ class App extends Component {
   }
 
   handleChange(event) {
-    this.setState({query: event.target.value});
+    this.setState({
+      query: event.target.value,
+      offset: 0
+    });
     this.search();
   }
 
@@ -51,16 +55,11 @@ class App extends Component {
 
   componentWillMount() {
 
-    this.setState({gif : this.state.gifs.map((el, i) => {
-      console.log(el.images.fixed_height.url + ' ' + el.id);
-      return <Gif gif={el.images.fixed_height.url} key={el.id} />
-    })});
-    debugger;
   }
 
   render() {
 
-    
+
 
     return (
       <div className="App">
@@ -69,9 +68,7 @@ class App extends Component {
           <p>
             Here are your gifs:
           </p>
-          {console.log(this.state.gif)}
-          {console.log('render it plox')}
-          <div>{this.state.gif}</div>
+          <Gifs gifs={this.state.gifs} />
         </header>
       </div>
     );

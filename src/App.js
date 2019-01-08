@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import './App.css';
+import InfiniteScroller from 'react-infinite-scroller';
 
 import Gifs from './Gifs';
 
@@ -12,7 +13,8 @@ class App extends Component {
       gifs : [],
       timerID : null,
       query : '',
-      offset : 0
+      offset : 0,
+      hasMore: false
     }
 
     this.search = this.search.bind(this);
@@ -21,6 +23,7 @@ class App extends Component {
   }
 
   findGifs() {
+    this.setState({hasMore: false});
     console.log('I am about to search!');
     client.search('gifs', {"q": this.state.query, offset: this.state.offset})
     .then((response) => {
@@ -32,8 +35,10 @@ class App extends Component {
         console.log(el);
         return el;
       })});
-      this.setState({offset: this.state.gifs.length});
+      let tempOffset = this.state.offset + 10;
+      this.setState({offset: tempOffset});
       console.log(this.state.offset);
+      this.setState({hasMore: true});
     })
     .catch((err) => {
       console.log('an error occured, dang it \n' + err);
@@ -43,14 +48,16 @@ class App extends Component {
   handleChange(event) {
     this.setState({
       query: event.target.value,
-      offset: 0
+      offset: 0,
+      gifs: [],
+      hasMore: false
     });
     this.search();
   }
 
   search() {
     clearTimeout(this.state.timerID);
-    this.setState({timerID : setTimeout(() => {this.findGifs()}, 2000)});
+    this.setState({timerID : setTimeout(() => {this.findGifs()}, 1000)});
   }
 
   componentWillMount() {
@@ -68,7 +75,15 @@ class App extends Component {
           <p>
             Here are your gifs:
           </p>
-          <Gifs gifs={this.state.gifs} />
+          <InfiniteScroller
+          pageStart={0}
+          loadMore={this.findGifs}
+          hasMore={this.state.hasMore}
+          loader={<div className="loader" key={0}>Loading ...</div>}
+          initialLoad={false}
+          >
+            <Gifs gifs={this.state.gifs} />
+          </InfiniteScroller>
         </header>
       </div>
     );
